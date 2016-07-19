@@ -1,7 +1,7 @@
 export convolution, convolution!, ∇convolution!
 export CUDNN_CONVOLUTION, CUDNN_CROSS_CORRELATION
 
-function convolution_desc(padding, stride, mode)
+function convolution_desc(T::Type, padding, stride, mode)
     N = length(padding)
     p = Ptr{Void}[0]
     cudnnCreateConvolutionDescriptor(p)
@@ -18,7 +18,7 @@ function convolution!{T}(x::CuArray{T}, w::CuArray{T}, padding, stride, y::CuArr
     h = gethandle(device(x))
     xdesc = tensor_desc(x)
     wdesc = filter_desc(w)
-    convdesc = convolution_desc(padding, stride, mode)
+    convdesc = convolution_desc(T, padding, stride, mode)
     ydesc = tensor_desc(y)
 
     algo_p = cudnnConvolutionFwdAlgo_t[0]
