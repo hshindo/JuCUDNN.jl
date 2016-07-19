@@ -1,30 +1,7 @@
 export convolution, convolution!, ∇convolution!
 export CUDNN_CONVOLUTION, CUDNN_CROSS_CORRELATION
 
-#=
-type ConvolutionDesc{N}
-ptr::Ptr{Void}
-padding::NTuple{N,Int}
-stride::NTuple{N,Int}
-end
-
-function ConvolutionDesc{T,N}(::Type{T}, padding::NTuple{N,Int}, stride::NTuple{N,Int};
-mode=CUDNN_CROSS_CORRELATION)
-p = Ptr{Void}[0]
-cudnnCreateConvolutionDescriptor(p)
-cpadding = Cint[padding[i] for i=N:-1:1]
-cstride = Cint[stride[i] for i=N:-1:1]
-cupscale = fill(Cint(1), N)
-cudnnSetConvolutionNdDescriptor(p[1], N, cpadding, cstride, cupscale, mode, datatype(T))
-desc = ConvolutionDesc(p[1], padding, stride)
-finalizer(desc, cudnnDestroyConvolutionDescriptor)
-desc
-end
-
-Base.unsafe_convert(::Type{Ptr{Void}}, desc::ConvolutionDesc) = desc.ptr
-=#
-
-function convolution_desc(padding, stride)
+function convolution_desc(padding, stride, mode)
     N = length(padding)
     p = Ptr{Void}[0]
     cudnnCreateConvolutionDescriptor(p)
@@ -41,7 +18,7 @@ function convolution!{T}(x::CuArray{T}, w::CuArray{T}, padding, stride, y::CuArr
     h = gethandle(device(x))
     xdesc = tensor_desc(x)
     wdesc = filter_desc(w)
-    convdesc = convolution_desc(padding, stride)
+    convdesc = convolution_desc(padding, stride, mode)
     ydesc = tensor_desc(y)
 
     algo_p = cudnnConvolutionFwdAlgo_t[0]
