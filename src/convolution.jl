@@ -27,7 +27,7 @@ function convolution!{T}(x::CuArray{T}, w::CuArray{T}, padding, stride, y::CuArr
     algo = algo_p[1]
 
     worksize_p = Cint[0]
-    cudnnGetConvolutionForwardWorkspaceSize(h, xdesc, wdesc, desc, ydesc, algo, worksize_p)
+    cudnnGetConvolutionForwardWorkspaceSize(h, xdesc, wdesc, convdesc, ydesc, algo, worksize_p)
     worksize = worksize_p[1]
     workspace = CuArray(Int8, Int(worksize))
 
