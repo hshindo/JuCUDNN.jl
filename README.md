@@ -30,6 +30,20 @@ x = curand(Float32,5,4,3,2)
 w = curand(Float32,2,2,3,4)
 y = convolution(x, w, (0,0), (1,1))
 Array(y)
+
+x = curand(Float32,5,4,3,2)
+w = curand(Float32,2,2,3,1)
+y = convolution(x, w, (0,0), (1,1))
+dy=y
+dx=zeros(x)
+∇convolution_data!(x,w,dy,(0,0),(1,1),dx)
+Array(dx)
+dw=zeros(w)
+∇convolution_filter!(x,dy,(0,0),(1,1),dw)
+Array(dw)
+db=similar(dy,1,1,1,1)
+∇convolution_bias!(x,dy,db)
+Array(db)
 ```
 
 ## Bias
