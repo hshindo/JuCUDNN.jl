@@ -29,6 +29,7 @@ include("tensor.jl")
 include("activation.jl")
 include("convolution.jl")
 include("filter.jl")
+include("pooling.jl")
 include("softmax.jl")
 
 end
