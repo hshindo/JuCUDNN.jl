@@ -70,6 +70,16 @@ dx = zeros(x)
 Array(dx)
 ```
 
+## LRN
+```julia
+x = curand(Float32,5,4,3,2)
+y = lrn(x)
+dy = y
+dx = zeros(x)
+∇lrn!(x, y, dy, dx)
+Array(dx)
+```
+
 ## Others
 ```julia
 ```

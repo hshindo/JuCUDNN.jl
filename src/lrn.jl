@@ -1,18 +1,56 @@
-type LRNDescriptor
-  ptr::Ptr{Void}
-end
+export lrn, lrn!, ∇lrn!
 
-function LRNDescriptor(n::Float64, alpha::Float64, beta::Float64, k::Float64)
+function lrn_desc(n, lrnalpha, lrnbeta, k)
   p = Ptr{Void}[0]
   cudnnCreateLRNDescriptor(p)
-  cudnnSetLRNDescriptor(p[1], n, alpha, beta, k)
-  desc = new(p[1])
-  finalizer(desc, cudnnDestroyLRNDescriptor)
-  desc
+  cn = Cuint(n)
+  clrnalpha = Cdouble(lrnalpha)
+  clrnbeta = Cdouble(lrnbeta)
+  ck = Cdouble(k)
+  cudnnSetLRNDescriptor(p[1], cn, clrnalpha, clrnbeta, ck)
+  p[1]
 end
 
-Base.unsafe_convert(::Type{Ptr{Void}}, desc::LRNDescriptor) = desc.ptr
+function lrn!{T}(x::CuArray{T}, y::CuArray{T};
+  mode=CUDNN_LRN_CROSS_CHANNEL_DIM1, n=5, lrnalpha=1e-4, lrnbeta=0.75, k=2.0, alpha=1.0, beta=0.0)
 
-function crosschanel()
-  cudnnLRNCrossChannelForward()
+  h = gethandle(device(x))
+  lrndesc = lrn_desc(n, lrnalpha, lrnbeta, k)
+  xdesc = tensor_desc(x)
+  ydesc = tensor_desc(y)
+
+  cudnnLRNCrossChannelForward(h, lrndesc, mode, T[alpha], xdesc, x, T[beta], ydesc, y)
+
+  cudnnDestroyLRNDescriptor(lrndesc)
+  cudnnDestroyTensorDescriptor(xdesc)
+  cudnnDestroyTensorDescriptor(ydesc)
+  y
+end
+
+function lrn(x::CuArray;
+  mode=CUDNN_LRN_CROSS_CHANNEL_DIM1, n=5, lrnalpha=1e-4, lrnbeta=0.75, k=2.0, alpha=1.0, beta=0.0)
+
+  y=similar(x)
+  lrn!(x, y, mode=mode, n=n, lrnalpha=lrnalpha, lrnbeta=lrnbeta, k=k, alpha=alpha, beta=beta)
+end
+
+function ∇lrn!{T}(x::CuArray{T}, y::CuArray{T}, dy::CuArray{T}, dx::CuArray{T};
+  mode=CUDNN_LRN_CROSS_CHANNEL_DIM1, n=5, lrnalpha=1e-4, lrnbeta=0.75, k=2.0, alpha=1.0, beta=0.0)
+
+  h = gethandle(device(x))
+  lrndesc = lrn_desc(n, lrnalpha, lrnbeta, k)
+  ydesc = tensor_desc(y)
+  dydesc = tensor_desc(dy)
+  xdesc = tensor_desc(x)
+  dxdesc = tensor_desc(dx)
+
+  cudnnLRNCrossChannelBackward(h, lrndesc, mode, T[alpha], ydesc, y,
+    dydesc, dy, xdesc, x, T[beta], dxdesc, dx)
+
+  cudnnDestroyLRNDescriptor(lrndesc)
+  cudnnDestroyTensorDescriptor(ydesc)
+  cudnnDestroyTensorDescriptor(dydesc)
+  cudnnDestroyTensorDescriptor(xdesc)
+  cudnnDestroyTensorDescriptor(dxdesc)
+  y
 end
