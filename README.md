@@ -60,6 +60,16 @@ dx = zeros(x)
 Array(dx)
 ```
 
+## Softmax
+```julia
+x = curand(Float32,5,4,3,2)
+y = softmax(x,CUDNN_SOFTMAX_FAST)
+dy = y
+dx = zeros(x)
+∇softmax!(x, CUDNN_SOFTMAX_FAST, y, dy, dx)
+Array(dx)
+```
+
 ## Others
 ```julia
 ```
