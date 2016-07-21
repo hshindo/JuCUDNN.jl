@@ -46,8 +46,12 @@ db=similar(dy,1,1,1,1)
 Array(db)
 ```
 
-## Bias
+## Dropout
 ```julia
+x = curand(Float32,5,4,3,2)
+Array(x)
+y = dropout(x, 0.5)
+Array(y)
 ```
 
 ## Pooling
