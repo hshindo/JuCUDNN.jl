@@ -1,4 +1,4 @@
-export activation!
+export activation!, ∇activation!
 export
     CUDNN_ACTIVATION_SIGMOID, CUDNN_ACTIVATION_RELU,
     CUDNN_ACTIVATION_TANH, CUDNN_ACTIVATION_CLIPPED_RELU
