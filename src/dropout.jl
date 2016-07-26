@@ -1,4 +1,4 @@
-export dropout, dropout!
+export dropout, dropout!, ∇dropout!
 
 dropout(x::CuArray, droprate) = dropout!(x, similar(x), droprate)
 
@@ -29,5 +29,22 @@ function dropout!(x::CuArray, y::CuArray, droprate)
     cudnnDestroyDropoutDescriptor(dropoutdesc)
     cudnnDestroyTensorDescriptor(xdesc)
     cudnnDestroyTensorDescriptor(ydesc)
-    y
+    y, states, statessize, reservespace, reservesize
+end
+
+function ∇dropout!(x::CuArray, dy::CuArray, droprate, states, statessize, reservespace, reservesize, dx::CuArray)
+    h = gethandle(device(x))
+    p = Ptr{Void}[0]
+    cudnnCreateDropoutDescriptor(p)
+    dropoutdesc = p[1]
+
+    dydesc = tensor_desc(dy)
+    dxdesc = tensor_desc(dx)
+    cudnnSetDropoutDescriptor(dropoutdesc, h, Cfloat(droprate), states, statessize, 0)
+
+    cudnnDropoutForward(h, dropoutdesc, dydesc, dy, dxdesc, dx, reservespace, reservesize)
+
+    cudnnDestroyDropoutDescriptor(dropoutdesc)
+    cudnnDestroyTensorDescriptor(dydesc)
+    cudnnDestroyTensorDescriptor(dxdesc)
 end
