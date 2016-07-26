@@ -12,6 +12,7 @@ include("../libcudnn-5/libcudnn_types.jl")
     const libcudnn = Libdl.find_library(["libcudnn"])
   end)
 isempty(libcudnn) && throw("CUDNN library cannot be found.")
+info("CUDNN version: $(cudnnGetVersion())")
 
 function checkstatus(status)
   if status != CUDNN_STATUS_SUCCESS
