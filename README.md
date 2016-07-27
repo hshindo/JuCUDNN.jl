@@ -84,6 +84,30 @@ dx = zeros(x)
 Array(dx)
 ```
 
+## BatchNorm
+```julia
+x = curand(Float32,5,4,3,2)
+factor = 0.9
+epsilon = 0.001
+scale = CuArray(fill(Float32(1.0),(1,1,3,1)))
+bias = CuArray(fill(Float32(0.0),(1,1,3,1)))
+mean=similar(scale)
+invvar=similar(scale)
+y, rmean, rinvvar, smean, sinvvar = batchnorm_training(
+    CUDNN_BATCHNORM_SPATIAL, x, scale, bias, factor, mean, invvar, epsilon)
+Array(y)
+z = batchnorm_inference(
+    CUDNN_BATCHNORM_SPATIAL, x, scale, bias, rmean, rinvvar, epsilon)
+Array(z)
+dy = y
+dx = zeros(x)
+rscale = similar(scale)
+rbias = similar(scale)
+∇batchnorm!(
+    CUDNN_BATCHNORM_SPATIAL, x, dy, scale, rscale, rbias, epsilon, smean, sinvvar, dx)
+Array(dx)
+```
+
 ## Others
 ```julia
 ```
