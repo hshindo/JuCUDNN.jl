@@ -34,5 +34,6 @@ include("filter.jl")
 include("pooling.jl")
 include("softmax.jl")
 include("batchnorm.jl")
+include("rnn.jl")
 
 end
