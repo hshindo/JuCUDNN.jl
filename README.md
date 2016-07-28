@@ -11,7 +11,10 @@ julia> Pkg.clone("https://github.com/hshindo/JuCUDNN.jl.git")
 julia> Pkg.update()
 ```
 
-## Activation
+Currently, cuDNN v5 is supported.
+
+## Functions
+### Activation
 Supported modes: `relu`, `clipped_relu`, `sigmoid`, `tanh`
 ```julia
 x = curand(Float32,10,5,4,3)
@@ -20,7 +23,7 @@ y = activation!(CUDNN_ACTIVATION_SIGMOID, x, similar(x))
 Array(y)
 ```
 
-## Convolution
+### Convolution
 ```julia
 x = curand(Float32,5,4,3,2)
 w = curand(Float32,2,2,3,4)
@@ -42,7 +45,7 @@ db = similar(dy,1,1,1,1)
 Array(db)
 ```
 
-## Dropout
+### Dropout
 ```julia
 x = curand(Float32,5,4,3,2)
 Array(x)
@@ -54,7 +57,7 @@ dx = zeros(x)
 Array(dx)
 ```
 
-## Pooling
+### Pooling
 ```julia
 x = curand(Float32,5,5,1,1)
 y = pooling(x, (3,3), (1,1), (2,2), CUDNN_POOLING_MAX)
@@ -64,7 +67,7 @@ dx = zeros(x)
 Array(dx)
 ```
 
-## Softmax
+### Softmax
 ```julia
 x = curand(Float32,5,4,3,2)
 y = softmax(x,CUDNN_SOFTMAX_FAST)
@@ -74,7 +77,7 @@ dx = zeros(x)
 Array(dx)
 ```
 
-## LRN
+### LRN
 ```julia
 x = curand(Float32,5,4,3,2)
 y = lrn(x)
@@ -84,7 +87,7 @@ dx = zeros(x)
 Array(dx)
 ```
 
-## BatchNorm
+### BatchNorm
 ```julia
 x = curand(Float32,5,4,3,2)
 factor = 0.9
