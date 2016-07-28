@@ -108,6 +108,15 @@ rbias = similar(scale)
 Array(dx)
 ```
 
+## RNN
+```julia
+x = curand(Float32,5,4,3,2)
+hiddensize = 1
+numlayers = 1
+droprate = 0.5
+desc = rnn_desc(x, hiddensize, numlayers, droprate, CUDNN_LINEAR_INPUT, CUDNN_UNIDIRECTIONAL, CUDNN_RNN_RELU)
+```
+
 ## Others
 ```julia
 ```
