@@ -2,17 +2,13 @@
 NVIDIA [cuDNN](https://github.com/hshindo/Merlin.jl) wrapper for Julia.
 
 * [CUDNN.jl](https://github.com/JuliaGPU/CUDNN.jl) is based on `CudaArray` in [Cudart.jl](https://github.com/JuliaGPU/CUDArt.jl)
-* JuCuDNN.jl is based on `CuArray` in [JuCUDA.jl].
+* JuCuDNN.jl is based on `CuArray` in [JuCUDA.jl](https://github.com/hshindo/JuCUDA.jl.git).
 
 ## Installation
 ```julia
 julia> Pkg.clone("https://github.com/hshindo/JuCUDA.jl.git")
 julia> Pkg.clone("https://github.com/hshindo/JuCUDNN.jl.git")
 julia> Pkg.update()
-```
-
-## Types
-```julia
 ```
 
 ## Activation
@@ -110,8 +106,4 @@ rbias = similar(scale)
 ∇batchnorm!(
     CUDNN_BATCHNORM_SPATIAL, x, dy, scale, rscale, rbias, epsilon, smean, sinvvar, dx)
 Array(dx)
-```
-
-## Others
-```julia
 ```
