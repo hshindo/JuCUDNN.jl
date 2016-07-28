@@ -34,14 +34,14 @@ Array(y)
 x = curand(Float32,5,4,3,2)
 w = curand(Float32,2,2,3,1)
 y = convolution(x, w, (0,0), (1,1))
-dy=y
-dx=zeros(x)
+dy = y
+dx = zeros(x)
 ∇convolution_data!(x,w,dy,(0,0),(1,1),dx)
 Array(dx)
-dw=zeros(w)
+dw = zeros(w)
 ∇convolution_filter!(x,dy,(0,0),(1,1),dw)
 Array(dw)
-db=similar(dy,1,1,1,1)
+db = similar(dy,1,1,1,1)
 ∇convolution_bias!(x,dy,db)
 Array(db)
 ```
@@ -50,8 +50,12 @@ Array(db)
 ```julia
 x = curand(Float32,5,4,3,2)
 Array(x)
-y = dropout(x, 0.5)
+y, s, ssize, rspace, rsize = dropout(x, 0.5)
 Array(y)
+dy = y
+dx = zeros(x)
+∇dropout!(x, dy, 0.5, s, ssize, rspace, rsize, dx)
+Array(dx)
 ```
 
 ## Pooling
@@ -91,8 +95,8 @@ factor = 0.9
 epsilon = 0.001
 scale = CuArray(fill(Float32(1.0),(1,1,3,1)))
 bias = CuArray(fill(Float32(0.0),(1,1,3,1)))
-mean=similar(scale)
-invvar=similar(scale)
+mean = similar(scale)
+invvar = similar(scale)
 y, rmean, rinvvar, smean, sinvvar = batchnorm_training(
     CUDNN_BATCHNORM_SPATIAL, x, scale, bias, factor, mean, invvar, epsilon)
 Array(y)
