@@ -110,3 +110,47 @@ rbias = similar(scale)
     CUDNN_BATCHNORM_SPATIAL, x, dy, scale, rscale, rbias, epsilon, smean, sinvvar, dx)
 Array(dx)
 ```
+
+### RNN
+```julia
+data_t = Float32
+inputsize = 16
+batchsize = 8
+seqlength = 5
+hiddensize = 16
+numlayers = 3
+droprate = 0
+input_t = CUDNN_LINEAR_INPUT
+dir_t = CUDNN_UNIDIRECTIONAL
+net_t = CUDNN_LSTM
+x  = curand(data_t, 1, inputsize,  batchsize, seqlength)
+hx = curand(data_t, 1, hiddensize, batchsize, numlayers)
+cx = curand(data_t, 1, hiddensize, batchsize, numlayers)
+w, y, hy, cy, dropdesc, s = rnn_training(x, hx, cx, droprate, input_t, dir_t, net_t)
+println(Array(w))
+println(Array(y))
+println(Array(hy))
+println(Array(cy))
+dy = y
+dhy = hy
+dcy = cy
+dx = zeros(x)
+dhx = zeros(hx)
+dcx = zeros(cx)
+∇rnn_data!(x, hx, cx, w, y, dy, dhy, dcy, dropdesc, input_t, dir_t, net_t, dx, dhx, dcx)
+println(Array(dx))
+println(Array(dhx))
+println(Array(dcx))
+dw = zeros(w)
+∇rnn_weight!(x, hx, y, w, dropdesc, input_t, dir_t, net_t, dw)
+println(Array(dw))
+z, hz, cz = rnn_inference(x, hx, cx, w, dropdesc, input_t, dir_t, net_t)
+println(Array(z))
+println(Array(hz))
+println(Array(cz))
+JuCUDNN.cudnnDestroyDropoutDescriptor(dropdesc)
+```
+
+### Others
+```julia
+```
