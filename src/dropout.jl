@@ -32,8 +32,8 @@ function dropout!(x::CuArray, y::CuArray, droprate)
     y, states, statessize, reservespace, reservesize
 end
 
-function ∇dropout!(x::CuArray, dy::CuArray, droprate, states, statessize, reservespace, reservesize, dx::CuArray)
-    h = gethandle(device(x))
+function ∇dropout!(dy::CuArray, droprate, states, statessize, reservespace, reservesize, dx::CuArray)
+    h = gethandle(device(dy))
     p = Ptr{Void}[0]
     cudnnCreateDropoutDescriptor(p)
     dropoutdesc = p[1]

@@ -53,7 +53,7 @@ y, s, ssize, rspace, rsize = dropout(x, 0.5)
 Array(y)
 dy = y
 dx = zeros(x)
-∇dropout!(x, dy, 0.5, s, ssize, rspace, rsize, dx)
+∇dropout!(dy, 0.5, s, ssize, rspace, rsize, dx)
 Array(dx)
 ```
 
