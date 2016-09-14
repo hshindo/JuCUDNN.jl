@@ -6,21 +6,29 @@ export
     CUDNN_BATCHNORM_PER_ACTIVATION, CUDNN_BATCHNORM_SPATIAL # mode
 
 function batchnorm_inference(mode, x::CuArray, scale::CuArray, bias::CuArray,
-    mean::CuArray, var::CuArray, epsilon; alpha=1.0, beta=0.0)
+    estmean::CuArray, estvar::CuArray, epsilon; alpha=1.0, beta=0.0)
     
-    batchnorm_inference!(mode, x, similar(x), scale, bias, mean, var, epsilon,
+    batchnorm_inference!(mode, x, similar(x), scale, bias, estmean, estvar, epsilon,
         alpha=alpha, beta=beta)
 end
 
 function batchnorm_training(mode, x::CuArray, scale::CuArray, bias::CuArray,
-    averagefactor, runmean::CuArray, runinvvar::CuArray, epsilon; alpha=1.0, beta=0.0)
+    averagefactor, epsilon; alpha=1.0, beta=0.0)
     
-    batchnorm_training!(mode, x, similar(x), scale, bias, averagefactor, runmean, runinvvar,
-        epsilon, similar(runmean), similar(runinvvar), alpha=alpha, beta=beta)
+    y = similar(x)
+    runmean = zeros(scale)
+    runvar = zeros(scale)
+    savemean = similar(scale)
+    saveinvvar = similar(scale)
+
+    batchnorm_training!(mode, x, y, scale, bias, averagefactor, runmean, runvar,
+        epsilon, savemean, saveinvvar, alpha=alpha, beta=beta)
+
+    y, runmean, runvar, savemean, saveinvvar
 end
 
 function batchnorm_inference!{T}(mode, x::CuArray{T}, y::CuArray{T},
-    scale::CuArray{T}, bias::CuArray{T}, mean::CuArray{T}, var::CuArray{T},
+    scale::CuArray{T}, bias::CuArray{T}, estmean::CuArray{T}, estvar::CuArray{T},
     epsilon; alpha=1.0, beta=0.0)
 
     h = gethandle(device(x))
@@ -29,7 +37,7 @@ function batchnorm_inference!{T}(mode, x::CuArray{T}, y::CuArray{T},
     sbmvdesc = tensor_desc(scale)
 
     cudnnBatchNormalizationForwardInference(h, mode, T[alpha], T[beta], xdesc, x,
-        ydesc, y, sbmvdesc, scale, bias, mean, var, Cdouble(epsilon))
+        ydesc, y, sbmvdesc, scale, bias, estmean, estvar, Cdouble(epsilon))
 
     cudnnDestroyTensorDescriptor(xdesc)
     cudnnDestroyTensorDescriptor(ydesc)
@@ -39,7 +47,7 @@ end
 
 function batchnorm_training!{T}(mode, x::CuArray{T}, y::CuArray{T},
     scale::CuArray{T}, bias::CuArray{T}, averagefactor, runmean::CuArray{T},
-    runinvvar::CuArray{T}, epsilon, savemean::CuArray{T}, saveinvvar::CuArray{T};
+    runvar::CuArray{T}, epsilon, savemean::CuArray{T}, saveinvvar::CuArray{T};
     alpha=1.0, beta=0.0)
 
     h = gethandle(device(x))
@@ -48,13 +56,12 @@ function batchnorm_training!{T}(mode, x::CuArray{T}, y::CuArray{T},
     sbmvdesc = tensor_desc(scale)
 
     cudnnBatchNormalizationForwardTraining(h, mode, T[alpha], T[beta], xdesc, x,
-        ydesc, y, sbmvdesc, scale, bias, Cdouble(averagefactor), runmean, runinvvar,
+        ydesc, y, sbmvdesc, scale, bias, Cdouble(averagefactor), runmean, runvar,
 	Cdouble(epsilon), savemean, saveinvvar)
 
     cudnnDestroyTensorDescriptor(xdesc)
     cudnnDestroyTensorDescriptor(ydesc)
     cudnnDestroyTensorDescriptor(sbmvdesc)
-    y, runmean, runinvvar, savemean, saveinvvar
 end
 
 function ∇batchnorm!{T}(mode, x::CuArray{T}, dy::CuArray{T},
